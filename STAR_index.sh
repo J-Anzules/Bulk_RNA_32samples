@@ -28,7 +28,7 @@ STAR --runMode genomeGenerate \
     --sjdbGTFfile "$gtf_file" \
     # --sjdbFileChrStartEnd "$regulatory_gff" \
     --sjdbOverhang 149 \
-    --runThreadN 25
+    --runThreadN 32
     # --genomeSAindexNbases 14 \
     # --limitGenomeGenerateRAM 160000000000  \
     

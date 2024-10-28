@@ -1,12 +1,15 @@
 library(edgeR)
 library(DESeq2)
 library(pheatmap)
+library(dplyr)
 
 #-------------------Normalization edgeR-----------------------------------
-CountMatrix_loc <- "C:/Users/jonan/Documents/1Work/RoseLab/bulkRNAseq_32samples/data/count_matrix_unclean.csv"
-"C:/Users/jonan/Documents/1Work/RoseLab/bulkRNAseq_32samples/Figures/From_unlceaned_data/"
+
+CountMatrix_loc <- "C:/Users/jonan/Documents/1Work/RoseLab/bulkRNAseq_32samples/data/count_matrix_clean_fpStr.csv"
+# CountMatrix_loc <- "C:/Users/jonan/Documents/1Work/RoseLab/bulkRNAseq_32samples/data/count_matrix_unclean.csv"
+
 ct_mtx <- read.csv(CountMatrix_loc, header = TRUE, row.names = 1)
-ct_mtx$ensembl_gene_id <- NULL
+# ct_mtx$ensembl_gene_id <- NULL
 # norm.ct_mtx <- ct_mtx
 
 ## as DGEList
@@ -19,10 +22,11 @@ dge <- calcNormFactors(dge)
 norm.ct_mtx <- cpm(dge)
 #-------------------Normalization DESEQ2-----------------------------------
 
-CountMatrix_loc <- "C:/Users/jonan/Documents/1Work/RoseLab/bulkRNAseq_32samples/data/count_matrix_unclean.csv"
+CountMatrix_loc <- "C:/Users/jonan/Documents/1Work/RoseLab/bulkRNAseq_32samples/data/count_matrix_clean_fpStr.csv"
+# CountMatrix_loc <- "C:/Users/jonan/Documents/1Work/RoseLab/bulkRNAseq_32samples/data/count_matrix_unclean.csv"
 
 ct_mtx <- read.csv(CountMatrix_loc, header = TRUE, row.names = 1)
-ct_mtx$ensembl_gene_id <- NULL
+# ct_mtx$ensembl_gene_id <- NULL
 
 # Load your CSV file
 metadata <- read.csv("C:/Users/jonan/Documents/1Work/RoseLab/bulkRNAseq_32samples/data/metadata_short.csv")
@@ -53,8 +57,32 @@ dds <- DESeqDataSetFromMatrix(
 # Run the DESeq2 analysis
 dds <- DESeq(dds)
 
-# Step 3: Extract the normalized counts
+##########################################################################
+# TWO DIFFERENT TYPES OF NORMALIZATIONS
+
+# Extract the normalized counts
 norm.ct_mtx <- counts(dds, normalized=TRUE)
+
+##########################################################################
+# Variance-Stabilizing Transformation - Considering condition
+vsd <- vst(dds, blind=FALSE)
+norm.ct_mtx <- assay(vsd) # This is used for visualization
+
+# Variance-Stabilizing Transformation - unbiased
+vsd <- vst(dds, blind=TRUE)
+norm.ct_mtx <- assay(vsd) # This is used for visualization
+
+
+##########################################################################
+# Perform the rlog transformation - Considering conditions
+rld <- rlog(dds, blind = FALSE)
+norm.ct_mtx <- assay(rld)
+
+# Perform the rlog transformation - unbiased
+rld <- rlog(dds, blind = TRUE)
+norm.ct_mtx <- assay(rld)
+
+
 
 #-------------------------Changing Names----------------------------
 # Load your CSV file
@@ -72,6 +100,8 @@ rownames(annotation_col) <- metadata$Sample_ID
 
 
 #-------------------Sequences of interest---------------------------
+
+
 
 gene_lists <- list(
   repair = c(
@@ -110,9 +140,65 @@ gene_lists <- list(
     "RPN1", "RPN2", "RPS27A", "RPS6KA3", "S100A11", 
     "SAA1", "SEC61B", "SEC61G", "SFTPA2", "SRP14", 
     "TRIM68", "TSTD1", "TUBB4B", "UBA52", "VAMP8"
-  )
-  
+  ),
+  survival_stress_repair = c(
+    "AREG", "ARG1", "ATR", "BAX", "BCL2", 
+    "BCL2L1", "BCL2L15", "BRCA1", "BRCA2", 
+    "CAT", "CCNG1", "CDK1", "CDK4", "CDK6", 
+    "CDKN1A", "CGAS", "DDB2", "EGR1", "ERCC1", 
+    "ERCC4", "ERCC5", "EZH2", "FANCG", "FDXR", 
+    "FOS", "FOSB", "FOSL1", "GADD45A", "GART", "GSK3B",
+    "H2AX", "HDAC1", "HIF1A", "HOXB9", "HSPA8", 
+    "JUN", "KEAP1", "KLF4", "KLK3", "LIG4",
+    "MDC1", "MDM2", "MKI67", "MRE11", "MTOR", "MYC", 
+    "NANOG", "NFKB1", "NFKBIE", "PALB2",
+    "PARP1", "PFKP", "PHPT1", "PRKDC", "PTTG1", "RAD50", 
+    "RAD51", "RAD9A", "SESN1",
+    "SMUG1", "SOX2", "STAT3", "STING1", "TERT", "TOP2A", 
+    "TP53AIP1", "TP53INP2", "TP63",
+    "TP73", "TXNRD1", "WEE1", "XRCC1", "XRCC5"
+  ),
+  metabolism = c(
+    "ABCC5", "ACACA", "ACO1", "ACSL1", "ADHFE1",
+    "ALDH6A1", "AMACR", "AMELX", "ARG2", "ATXN3",
+    "CERK", "CMBL", "CNTN3", "COX6C", "COX7C",
+    "CYB5A", "CYP4F2", "DBI", "DCUN1D1", "DCXR",
+    "DECR1", "DEGS1", "DHCR7", "EDEM3", "EEF1A2",
+    "FABP12", "FABP4", "FDFT1", "FOXO1", "FOXO3",
+    "FOXO4", "GLYATL1", "GNG4", "GNMT", "GSK3A",
+    "GSK3B", "H2BC14", "H4C5", "H4C8", "HACD2",
+    "HMGA1", "HNF1A", "HNF1B", "HNF4A", "HNF4G",
+    "HSP90AB1", "IDH1", "IGFBP1", "IGFBP3", "INPP4B",
+    "INSR", "IRS1", "IRS2", "IRS4", "KCNC2",
+    "MAOA", "MAPK1", "MRPS25", "N6AMT1", "NCOR1",
+    "NUDT10", "ODC1", "PDX1", "PHC3", "PHGDH",
+    "PIK3C2G", "PIK3R4", "PIP", "PLA2G4F", "PMP2",
+    "PODXL2", "PTGR1", "PYCR1", "RAD21", "RBP4",
+    "RPL11", "RPL12", "RPL13", "RPL13A", "RPL14",
+    "RPL37A", "RPL7A", "RPS3A", "RPS4X", "RPS5",
+    "RPS6", "RPS7", "RPS8", "SC5D", "SCD",
+    "SPTSSA", "TBL1XR1", "THRB", "TPTE", "UBP1",
+    "UQCR10", "UQCRQ"
+   ),
+  apoptosis = c(
+    "APAF1", "BAD", "BAK1", "BAX", "BBC3",
+    "BCL2", "BID", "BLK", "CASP1", "CASP3",
+    "CASP8", "CASP9", "CDH1", "CYCS", "DSG2",
+    "DSP", "FAS", "GAPDH", "H1-0", "H1-2",
+    "HTRA1", "HTRA2", "HTRA3", "HTRA4", "MAGED1",
+    "MCL1", "NOXA1", "PMAIP1", "PRG3", "PXMP4",
+    "RPN1", "RPN2", "RPS27A", "SMAD1", "SMAD2",
+    "SMAD3", "SMAD4", "SMAD5", "SMAD6", "SMAD7",
+    "SMAD9", "STEAP3", "TNF", "TNFRSF10C", "TNFRSF10D",
+    "TP53", "TP53AIP1", "TP63", "TP73", "TRADD",
+    "UBA52", "YWHAE"
+   ),
+  house_keeping = c(
+    "ACTB", "B2M", "GAPDH", "GUSB", "HMBS",
+    "HPRT1", "PGK1", "PPIA", "RPL13A", "RPLP0",
+    "SDHA", "TBP", "TFRC", "YWHAZ")
 )
+
 
 
 # Checking if any genes are not found in the matrix
@@ -120,12 +206,21 @@ gene_lists <- list(
 # rt_resistance[!rt_resistance %in% rownames(ct_mtx)]
 # immune[!immune %in% rownames(ct_mtx)]
 
-output_dir <- "C:/Users/jonan/Documents/1Work/RoseLab/bulkRNAseq_32samples/Figures/From_unlceaned_data/zscores/"
+output_dir <- "C:/Users/jonan/Documents/1Work/RoseLab/bulkRNAseq_32samples/Figures/fasp_star_clean/heatmaps/"
 
 
 #----------------------------Zscores----------------------------------------
 # Update the heatmap generation function to include the sample annotations
 generate_heatmap <- function(gene_list, gene_set_name, norm_ct_mtx, output_dir, annotation_col) {
+  
+  # Identify genes that are missing in the matrix
+  missing_genes <- gene_list[!gene_list %in% rownames(norm_ct_mtx)]
+  
+  # Print missing genes for tracking
+  if (length(missing_genes) > 0) {
+    cat("Missing genes for", gene_set_name, ":", paste(missing_genes, collapse = ", "), "\n")
+  }
+  
   # Subset the normalized matrix to only include the genes of interest
   subset_mtx <- norm_ct_mtx[rownames(norm_ct_mtx) %in% gene_list, ]
   
@@ -138,8 +233,8 @@ generate_heatmap <- function(gene_list, gene_set_name, norm_ct_mtx, output_dir, 
   # Generate the heatmap with sample annotation
   heatmap_file <- paste0(output_dir, gene_set_name, "_zscore_heatmap.png")
   pheatmap(z_scores,
-           cluster_rows = FALSE,        # Cluster genes
-           cluster_cols = FALSE,        # Cluster samples
+           cluster_rows = TRUE,        # Cluster genes
+           cluster_cols = TRUE,        # Cluster samples
            color = colorRampPalette(c("blue", "white", "red"))(50),  # Color scale
            main = paste("Z-score Heatmap:", gene_set_name),
            annotation_col = annotation_col,  # Add annotation for RT/NRT
@@ -150,6 +245,8 @@ generate_heatmap <- function(gene_list, gene_set_name, norm_ct_mtx, output_dir, 
   
   cat("Heatmap saved for", gene_set_name, "at:", heatmap_file, "\n")
 }
+
+
 
 # Loop over each gene set and generate the heatmaps with sample annotations
 for (gene_set_name in names(gene_lists)) {
