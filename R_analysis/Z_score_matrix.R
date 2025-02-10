@@ -20,6 +20,9 @@ dge <- calcNormFactors(dge)
 
 ## get normalized counts
 norm.ct_mtx <- cpm(dge)
+
+write.table(norm.ct_mtx, "C:/Users/jonan/Documents/1Work/RoseLab/bulkRNAseq_32samples/data/for_deconvolution/edgeR_ct_mtx.tsv", sep="\t", row.names=TRUE, col.names=NA, quote=FALSE)
+
 #-------------------Normalization DESEQ2-----------------------------------
 
 CountMatrix_loc <- "C:/Users/jonan/Documents/1Work/RoseLab/bulkRNAseq_32samples/data/count_matrix_clean_fpStr.csv"

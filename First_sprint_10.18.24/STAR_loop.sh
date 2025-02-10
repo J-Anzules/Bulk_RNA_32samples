@@ -39,8 +39,8 @@ while read -r anumber; do
             --outSAMtype BAM Unsorted \
             --quantMode GeneCounts \
             --outFileNamePrefix "$output_dir/$star_prefix" \
-            --runThreadN 30 \
-            --limitBAMsortRAM 245000000000 \
+            --runThreadN 10 \
+            --limitBAMsortRAM 100000000000 \
             --genomeLoad NoSharedMemory
 
         # Clean up temporary directory

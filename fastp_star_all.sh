@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=fastSTAR_all    # Job name
-#SBATCH --output=/net/nfs-irwrsrchnas01/labs/yunroseli_grp/Jon/32_samples_10182024/slurm_job_output/fastSTAR_all.log
+#SBATCH --output=/net/nfs-irwrsrchnas01/labs/yunroseli_grp/Jon/32_samples_10182024/slurm_job_output/fastSTAR_all_2.log
 #SBATCH --error=/net/nfs-irwrsrchnas01/labs/yunroseli_grp/Jon/32_samples_10182024/slurm_job_output/fastSTAR_all_error.log
 #SBATCH --ntasks=1              # Run a single task
 #SBATCH --cpus-per-task=25      # Request all CPUs
